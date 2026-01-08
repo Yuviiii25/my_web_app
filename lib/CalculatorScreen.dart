@@ -1,6 +1,5 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
-
-
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -11,16 +10,31 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
 
-   Color themeColor = Colors.blue; 
+  Color themeColor = Colors.blue;
 
+  String displayText = "0";
+
+  void onButtonPressed(String value){
+    setState(() {
+      if(displayText == 0){
+        displayText = value;
+      }
+      else{
+        displayText += value;
+      }
+    });
+  }
 
   Widget CalculatorButton(String text){
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: (){}, 
+          onPressed: (){
+            onButtonPressed(text);
+          },
           style: ElevatedButton.styleFrom(
+              backgroundColor: themeColor,
               padding: const EdgeInsets.symmetric(vertical: 22),
               shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -81,20 +95,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         
       body: Column(
         children: [
-           Container(
+          Container(
             height: 200,
             color: Colors.blue,
             alignment: Alignment.bottomRight,
             padding: const EdgeInsets.all(24),
-            child: const Text(
-              "0",
+            child: Text(
+              displayText,
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w600,
               )
-             ),
-             
-           ),
+            ), 
+          ),
           const Divider(),
           buttonRow(["7", "8", "9", "÷"]),
           buttonRow(["4", "5", "6", "×"]),
