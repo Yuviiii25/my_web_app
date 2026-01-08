@@ -16,7 +16,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void onButtonPressed(String value){
     setState(() {
-      if(displayText == 0){
+      if(value == "C"){
+        displayText = "0";
+        return;
+      }
+
+      if(displayText == "0"){
         displayText = value;
       }
       else{
@@ -43,6 +48,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           child: Text(text, style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: Colors.black
             ),
             ),
           ),
@@ -97,7 +103,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         children: [
           Container(
             height: 200,
-            color: Colors.blue,
+            color: Colors.grey,
             alignment: Alignment.bottomRight,
             padding: const EdgeInsets.all(24),
             child: Text(
