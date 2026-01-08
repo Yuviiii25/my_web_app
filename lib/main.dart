@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:my_web_app/CalculatorScreen.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: CalculatorScreen(),
+    );
   }
 }
