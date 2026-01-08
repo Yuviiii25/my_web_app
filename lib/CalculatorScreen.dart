@@ -11,8 +11,9 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Color themeColor = Colors.blue;
-
   String displayText = "0";
+  bool _isNumber(String value) => ['0','1','2','3','4','5','6','7','8','9'].contains(value);
+  bool _isOperator(String value) =>['+', '-', '×', '÷'].contains(value);
 
   void onButtonPressed(String value){
     setState(() {
@@ -21,12 +22,26 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         return;
       }
 
+    if(_isNumber(value)){
       if(displayText == "0"){
         displayText = value;
       }
       else{
         displayText += value;
       }
+    }
+
+    if (_isOperator(value)) {
+      // Don’t start with operator
+      if (displayText == "0") return;
+
+      // Don’t allow double operators
+      final lastChar = displayText[displayText.length - 1];
+      if (_isOperator(lastChar)) return;
+
+      displayText += value;
+    }
+      
     });
   }
 
