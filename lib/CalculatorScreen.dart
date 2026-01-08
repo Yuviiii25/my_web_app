@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 
-class CalculatorScreen extends StatelessWidget {
+
+
+class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
+
+  @override
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+
+   Color themeColor = Colors.blue; 
+
 
   Widget CalculatorButton(String text){
     return Expanded(
@@ -38,7 +49,36 @@ class CalculatorScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Calculator"),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<Color>(
+            icon: const Icon(Icons.palette),
+
+            // When user selects a color
+            onSelected: (Color selectedColor) {
+              setState(() {
+                themeColor = selectedColor;
+              });
+            },
+
+            // Menu items
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: Colors.blue,
+                child: Text("Blue"),
+              ),
+              PopupMenuItem(
+                value: Colors.green,
+                child: Text("Green"),
+              ),
+              PopupMenuItem(
+                value: Colors.red,
+                child: Text("Red"),
+              ),
+            ],
+          ),
+        ],
       ),
+        
       body: Column(
         children: [
            Container(
