@@ -1,5 +1,5 @@
-// ignore: file_names
 import 'package:flutter/material.dart';
+import 'Calculator_logic.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -11,92 +11,9 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Color themeColor = Colors.blue;
-  String displayText = "0";
-  bool _isNumber(String value) => ['0','1','2','3','4','5','6','7','8','9'].contains(value);
-  bool _isOperator(String value) =>['+', '-', '×', '÷'].contains(value);
-  double? firstNumber;
-  String? currentOperator;
-  bool waitingForSecondNumber = false;
-  double? lastSecondNumber;
-  double _calculate(double a, double b, String op) {
-  switch (op) {
-    case '+':
-      return a + b;
-    case '-':
-      return a - b;
-    case '×':
-      return a * b;
-    case '÷':
-      return b == 0 ? 0 : a / b;
-    default:
-      return 0;
-  }
-}
 
-String _formatResult(double result) {
-  if (result % 1 == 0) {
-    return result.toInt().toString();
-  }
-  return result.toString();
-}
-
-  void onButtonPressed(String value) {
-  setState(() {
-
-    // CLEAR
-    if (value == "C") {
-      displayText = "0";
-      firstNumber = null;
-      currentOperator = null;
-      waitingForSecondNumber = false;
-      return;
-    }
-
-    // NUMBER
-    if (_isNumber(value)) {
-      if (displayText == "0" || waitingForSecondNumber) {
-        displayText = value;
-        waitingForSecondNumber = false;
-      } else {
-        displayText += value;
-      }
-      return;
-    }
-
-    // OPERATOR
-    if (_isOperator(value)) {
-      firstNumber = double.parse(displayText);
-      currentOperator = value;
-      waitingForSecondNumber = true;
-      return;
-    }
-
-    // EQUALS
-    if (value == "=" &&
-    firstNumber != null &&
-    currentOperator != null) {
-
-  double secondNumber;
-
-  if (!waitingForSecondNumber) {
-    secondNumber = double.parse(displayText);
-    lastSecondNumber = secondNumber;
-  } else {
-    secondNumber = lastSecondNumber ?? firstNumber!;
-  }
-
-  final result =
-      _calculate(firstNumber!, secondNumber, currentOperator!);
-
-  displayText = _formatResult(result);
-
-  firstNumber = result;
-  waitingForSecondNumber = true;
-}
-
-  });
-}
-
+  // Calculator logic separated
+  final logic = CalculatorLogic();
 
   Widget CalculatorButton(String text){
     return Expanded(
@@ -104,24 +21,28 @@ String _formatResult(double result) {
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
           onPressed: (){
-            onButtonPressed(text);
+            setState(() {
+              logic.input(text); 
+            });
           },
           style: ElevatedButton.styleFrom(
               backgroundColor: themeColor,
               padding: const EdgeInsets.symmetric(vertical: 22),
               shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+                borderRadius: BorderRadius.circular(12),
+              ),
           ),
-          child: Text(text, style: const TextStyle(
+          child: Text(
+            text,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black
             ),
-            ),
           ),
-        )
-      );
+        ),
+      ),
+    );
   }
 
   Widget buttonRow(List<String> buttons){
@@ -166,7 +87,7 @@ String _formatResult(double result) {
           ),
         ],
       ),
-        
+
       body: Column(
         children: [
           Container(
@@ -175,14 +96,16 @@ String _formatResult(double result) {
             alignment: Alignment.bottomRight,
             padding: const EdgeInsets.all(24),
             child: Text(
-              displayText,
+              logic.displayText,  
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w600,
-              )
-            ), 
+              ),
+            ),
           ),
+
           const Divider(),
+
           buttonRow(["7", "8", "9", "÷"]),
           buttonRow(["4", "5", "6", "×"]),
           buttonRow(["1", "2", "3", "-"]),
