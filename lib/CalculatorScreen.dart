@@ -17,6 +17,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double? firstNumber;
   String? currentOperator;
   bool waitingForSecondNumber = false;
+  double? lastSecondNumber;
   double _calculate(double a, double b, String op) {
   switch (op) {
     case '+':
@@ -72,21 +73,27 @@ String _formatResult(double result) {
 
     // EQUALS
     if (value == "=" &&
-        firstNumber != null &&
-        currentOperator != null &&
-        !waitingForSecondNumber) {
+    firstNumber != null &&
+    currentOperator != null) {
 
-      final secondNumber = double.parse(displayText);
+  double secondNumber;
 
-      final result =
-          _calculate(firstNumber!, secondNumber, currentOperator!);
+  if (!waitingForSecondNumber) {
+    secondNumber = double.parse(displayText);
+    lastSecondNumber = secondNumber;
+  } else {
+    secondNumber = lastSecondNumber ?? firstNumber!;
+  }
 
-      displayText = _formatResult(result);
+  final result =
+      _calculate(firstNumber!, secondNumber, currentOperator!);
 
-      firstNumber = null;
-      currentOperator = null;
-      waitingForSecondNumber = true;
-    }
+  displayText = _formatResult(result);
+
+  firstNumber = result;
+  waitingForSecondNumber = true;
+}
+
   });
 }
 
