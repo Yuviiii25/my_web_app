@@ -33,6 +33,25 @@ class _SignIn_screenState extends State<SignIn_screen> {
     }
   }
 
+
+  Future resetPassword() async {
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(
+      email: email.text.trim(),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Password reset email sent")),
+    );
+
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,9 +157,7 @@ class _SignIn_screenState extends State<SignIn_screen> {
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    onTap: () {
-                     
-                    },
+                    onTap: resetPassword,
                     child: const Text(
                       "Forgot password?",
                       style: TextStyle(
