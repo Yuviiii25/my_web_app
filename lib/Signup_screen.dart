@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:my_web_app/SignIn_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -8,6 +10,30 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+
+   final email = TextEditingController();
+  final password = TextEditingController();
+
+  Future signup() async {
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email.text.trim(),
+        password: password.text.trim(),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Account Created Successfully")),
+      );
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,24 +78,25 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           children: [
 
-            //Name field
-            TextField(
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: "Name",
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white30),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.cyanAccent),
-                ),
-              ),
-            ),
+            // //Name field
+            // TextField(
+            //   style: const TextStyle(color: Colors.white),
+            //   decoration: const InputDecoration(
+            //     labelText: "Name",
+            //     labelStyle: TextStyle(color: Colors.white70),
+            //     enabledBorder: UnderlineInputBorder(
+            //       borderSide: BorderSide(color: Colors.white30),
+            //     ),
+            //     focusedBorder: UnderlineInputBorder(
+            //       borderSide: BorderSide(color: Colors.cyanAccent),
+            //     ),
+            //   ),
+            // ),
 
             const SizedBox(height: 16),
             // Enter Email field
             TextField(
+              controller: email,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: "Email",
@@ -87,6 +114,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
             // Set Password field
             TextField(
+              controller: password,
               obscureText: true,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
@@ -107,7 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {}, // UI only
+                onPressed: signup, // UI only
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.cyanAccent,
                   foregroundColor: Colors.black,
@@ -129,7 +157,10 @@ class _SignupScreenState extends State<SignupScreen> {
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
-                  //forgot password logic
+                   Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const SignIn_screen()),
+  );
                 },
                 child: const Text(
                   "Already a User? Sign In",
