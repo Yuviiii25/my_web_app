@@ -177,7 +177,7 @@ class _SignIn_screenState extends State<SignIn_screen> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                       Navigator.pushNamed(context, "/signup");
+                      Navigator.pushNamed(context, "/signup");
                     },
                     child: const Text(
                       "New User? Sign up",

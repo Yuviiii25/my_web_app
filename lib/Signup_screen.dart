@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -16,17 +17,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future signup() async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email.text.trim(),
         password: password.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Account Created Successfully")),
-      );
+      await FirebaseFirestore.instance
+        .collection("users")
+        .doc(cred.user!.uid)
+        .set({
+      "email": email.text.trim(),
+      "createdAt": FieldValue.serverTimestamp(),
+    });
 
       Navigator.pushReplacementNamed(context, "/signin");
-
+    
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,6 +100,8 @@ class _SignupScreenState extends State<SignupScreen> {
             //     ),
             //   ),
             // ),
+
+  
 
             const SizedBox(height: 16),
             // Enter Email field
