@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_web_app/CalculatorScreen.dart';
 import 'package:my_web_app/SignIn_screen.dart';
 import 'package:my_web_app/Signup_screen.dart';
+import 'package:my_web_app/auth_gate.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: "/signin",
+      home: const AuthGate(),
       routes: {
         "/signin": (context) => const SignIn_screen(),
         "/signup": (context) => const SignupScreen(),
