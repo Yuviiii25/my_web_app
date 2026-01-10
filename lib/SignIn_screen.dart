@@ -2,7 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'Signup_screen.dart';
+
 
 class SignIn_screen extends StatefulWidget {
   const SignIn_screen({super.key});
@@ -25,6 +25,8 @@ class _SignIn_screenState extends State<SignIn_screen> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Login Sucessful")));
+
+      Navigator.pushReplacementNamed(context, "/calculator");
     }
     catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,10 +177,7 @@ class _SignIn_screenState extends State<SignIn_screen> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SignupScreen()),
-                      );
+                       Navigator.pushNamed(context, "/signup");
                     },
                     child: const Text(
                       "New User? Sign up",

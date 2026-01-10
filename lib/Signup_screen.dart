@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_web_app/SignIn_screen.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -11,7 +11,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
 
-   final email = TextEditingController();
+  final email = TextEditingController();
   final password = TextEditingController();
 
   Future signup() async {
@@ -24,6 +24,9 @@ class _SignupScreenState extends State<SignupScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Account Created Successfully")),
       );
+
+      Navigator.pushReplacementNamed(context, "/signin");
+
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: signup, // UI only
+                onPressed: signup, 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.cyanAccent,
                   foregroundColor: Colors.black,
@@ -157,10 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
-                   Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const SignIn_screen()),
-  );
+                  Navigator.pushReplacementNamed(context, "/signin");
                 },
                 child: const Text(
                   "Already a User? Sign In",
