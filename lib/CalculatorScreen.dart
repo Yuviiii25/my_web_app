@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'Calculator_logic.dart';
 
@@ -56,6 +57,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Calculator"),
         centerTitle: true,
         actions: [
@@ -84,6 +86,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 child: Text("Red"),
               ),
             ],
+          ),
+
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+
+              Navigator.pushReplacementNamed(context, "/signin");
+            },
           ),
         ],
       ),
