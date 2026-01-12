@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'Calculator_logic.dart';
@@ -11,10 +12,43 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
 
+  @override
+  void initState() {
+    super.initState();
+    loadThemeColor();
+}
+
+
   Color themeColor = Colors.blue;
 
   // Calculator logic separated
   final logic = CalculatorLogic();
+
+  Future saveThemeColor(Color color) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+
+  await FirebaseFirestore.instance
+      .collection("users")
+      .doc(uid)
+      .update({
+    "themeColor": color.value,
+  });
+}
+
+Future loadThemeColor() async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+
+  final doc = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(uid)
+      .get();
+
+  if (doc.exists && doc.data()!.containsKey("themeColor")) {
+    setState(() {
+      themeColor = Color(doc["themeColor"]);
+    });
+  }
+}
 
   Widget CalculatorButton(String text){
     return Expanded(
@@ -69,7 +103,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               setState(() {
                 themeColor = selectedColor;
               });
-            },
+
+  saveThemeColor(selectedColor);
+},
 
             // Menu items
             itemBuilder: (context) => const [
