@@ -8,18 +8,18 @@ class WhatsAppScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-  backgroundColor: Colors.black,
-  elevation: 0,
+      backgroundColor: Colors.black,
+      elevation: 0,
 
-  // Drawer icon
-  leading: Builder(
-    builder: (context) => IconButton(
-      icon: const Icon(Icons.menu, color: Colors.white),
-      onPressed: () {
-        Scaffold.of(context).openDrawer();
-      },
-    ),
-  ),
+      // Drawer icon
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        ),
+      ),
 
   title: const Text(
     "WhatsApp",
@@ -153,8 +153,80 @@ class WhatsAppScreen extends StatelessWidget {
           ],
         ),
       ),
+
+      body: Row(
+        children: [
+
+          // Chat List
+          Container(
+            width: MediaQuery.of(context).size.width * 0.30,
+            color: Colors.black,
+            child: ListView(
+              children: [
+                chatTile("Neeraj", "Hello", "12:30")
+              ],
+            ),
+          ),
+
+          // Current Chat
+          Expanded(
+            child: Container(
+              color: Colors.grey[900],
+              child: const Center(
+                child: Text(
+                  "Open a chat",
+                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
+
+
+  Widget chatTile(String name, String message, String time) {
+    return Material(
+      color: Colors.black,
+      child: InkWell(
+        onTap: () {
+          print("Open $name chat");
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+
+              const CircleAvatar(radius: 22),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: "Oxygen",
+                            fontWeight: FontWeight.bold)),
+                    Text(message,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.grey)),
+                  ],
+                ),
+              ),
+
+              Text(time,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _drawerItem({
     required IconData icon,
