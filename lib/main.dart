@@ -4,6 +4,7 @@ import 'package:my_web_app/CalculatorScreen.dart';
 import 'package:my_web_app/SignIn_screen.dart';
 import 'package:my_web_app/Signup_screen.dart';
 import 'package:my_web_app/auth_gate.dart';
+import 'package:my_web_app/chat_list_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(),
+      home: const WhatsAppScreen(),
       routes: {
         "/signin": (context) => const SignIn_screen(),
         "/signup": (context) => const SignupScreen(),
