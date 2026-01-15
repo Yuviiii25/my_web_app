@@ -49,19 +49,13 @@ class WhatsAppScreen extends StatelessWidget {
     PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, color: Colors.white),
       color: Colors.grey[900],
-      onSelected: (value) {
-        if (value == "settings") {
-          // navigate to settings
-        }
+      onSelected: (value) async {
         if (value == "logout") {
-          // logout logic
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacementNamed(context, "/signin");
         }
       },
       itemBuilder: (context) => const [
-        PopupMenuItem(
-          value: "settings",
-          child: Text("Settings", style: TextStyle(color: Colors.white)),
-        ),
         PopupMenuItem(
           value: "logout",
           child: Text("Logout", style: TextStyle(color: Colors.white)),
@@ -136,20 +130,6 @@ class WhatsAppScreen extends StatelessWidget {
               },
             ),
       
-            const Spacer(),
-      
-            const Divider(color: Colors.grey),
-      
-            _drawerItem(
-              icon: Icons.logout,
-              title: "Logout",
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, "/signin");
-              },
-            ),
-      
-            const SizedBox(height: 16),
           ],
         ),
       ),
