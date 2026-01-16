@@ -1,8 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class WhatsAppScreen extends StatelessWidget {
+class WhatsAppScreen extends StatefulWidget {
   const WhatsAppScreen({super.key});
+
+  @override
+  State<WhatsAppScreen> createState() => _WhatsAppScreenState();
+}
+
+class _WhatsAppScreenState extends State<WhatsAppScreen> {
+
+  List<String> chats = [];
+
+  void showNewChatDialog(){
+    final emailController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:(context){
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text("Start a New Chat",style: TextStyle(color: Colors.black),),
+          content: TextField(
+            controller: emailController,
+            //style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: "Enter Email",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: (){
+              final email = emailController.text;
+              if (email.isNotEmpty) {
+              setState(() {
+                    chats.insert(0, email);
+                  });
+              }
+              Navigator.pop(context);
+            }, child: Text("Start")),
+
+            TextButton(onPressed: (){
+                Navigator.pop(context);
+              }
+            , child: Text("Cancel"))
+          ],
+        );
+      });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +86,7 @@ class WhatsAppScreen extends StatelessWidget {
       child: IconButton(
         icon: const Icon(Icons.chat, color: Colors.white),
       onPressed: () {
-        // later: start new chat
+        showNewChatDialog();
       },
     ),
     ),
@@ -141,11 +188,17 @@ class WhatsAppScreen extends StatelessWidget {
           Container(
             width: MediaQuery.of(context).size.width * 0.30,
             color: Colors.black,
-            child: ListView(
-              children: [
-                chatTile("Neeraj", "Hello", "12:30")
-              ],
-            ),
+            child: chats.isEmpty
+                ? const Center(
+                    child: Text("No chats",
+                        style: TextStyle(color: Colors.grey)),
+                  )
+                : ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      return chatTile(chats[index],"Tap to open", "Now");
+                    },
+                  ),
           ),
 
           // Current Chat
@@ -164,7 +217,6 @@ class WhatsAppScreen extends StatelessWidget {
       )
     );
   }
-
 
   Widget chatTile(String name, String message, String time) {
     return Material(
@@ -207,7 +259,6 @@ class WhatsAppScreen extends StatelessWidget {
     );
   }
 
-
   Widget _drawerItem({
     required IconData icon,
     required String title,
@@ -223,3 +274,4 @@ class WhatsAppScreen extends StatelessWidget {
     );
   }
 }
+
