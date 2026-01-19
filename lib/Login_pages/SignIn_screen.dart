@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, camel_case_types
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 
@@ -23,10 +24,23 @@ class _SignIn_screenState extends State<SignIn_screen> {
         password: password.text.trim(),
       );
 
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .set({
+              "email": user.email,
+              "lastLogin": FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+      }
+
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Login Sucessful")));
 
-      Navigator.pushReplacementNamed(context, "/calculator");
+      Navigator.pushReplacementNamed(context, "/whatsapp");
     }
     catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

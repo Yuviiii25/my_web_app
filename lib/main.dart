@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:my_web_app/Calculator/CalculatorScreen.dart';
+import 'package:my_web_app/Auth/auth_gate.dart';
 import 'package:my_web_app/Login_pages/SignIn_screen.dart';
 import 'package:my_web_app/Login_pages/Signup_screen.dart';
 import 'package:my_web_app/Whatsapp_Chat/chat_list_screen.dart';
@@ -21,11 +21,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WhatsAppScreen(),
+      home: const AuthGate(),
       routes: {
         "/signin": (context) => const SignIn_screen(),
         "/signup": (context) => const SignupScreen(),
-        "/calculator": (context) => const CalculatorScreen(),
+        "/whatsapp": (context) => const WhatsAppScreen(),
       }
     );
   }

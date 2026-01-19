@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WhatsAppScreen extends StatefulWidget {
   const WhatsAppScreen({super.key});
@@ -12,8 +13,11 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
   List<String> chats = [];
   String? selectedChat;
-  Map<String, List<String>> messages = {};
   final messageController = TextEditingController();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
 
   void showNewChatDialog(){
@@ -41,7 +45,7 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: (){
+                onPressed: () async {
                   final email = emailController.text.trim();
 
                   final emailRegex =
@@ -58,9 +62,20 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                     });
                   }
                   else {
-                    setState(() {
-                      chats.insert(0, email);
-                    });
+
+                    final uid = _auth.currentUser!.uid;
+
+                    await _firestore
+                        .collection("users")
+                        .doc(uid)
+                        .collection("chats")
+                        .doc(email)
+                        .set({
+                          "createdAt": FieldValue.serverTimestamp(),
+                        });
+
+                    loadChats();
+
                     Navigator.pop(context);
                   }
                 },
@@ -79,6 +94,31 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
       );
     });
 }
+
+
+
+  Future<void> loadChats() async {
+
+    final uid = _auth.currentUser!.uid;
+
+    final snapshot = await _firestore
+        .collection("users")
+        .doc(uid)
+        .collection("chats")
+        .get();
+
+    setState(() {
+      chats = snapshot.docs.map((e) => e.id).toList();
+    });
+  }
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    loadChats();
+  }
 
 
 
@@ -254,25 +294,45 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                       children: [
 
                        Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.all(12),
-                          children: messages[selectedChat]?.map((msg) {
-                            return Align(
-                              alignment: Alignment.centerRight,
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green[700],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  msg,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
+                        child: StreamBuilder(
+                          stream: _firestore
+                              .collection("users")
+                              .doc(_auth.currentUser!.uid)
+                              .collection("chats")
+                              .doc(selectedChat)
+                              .collection("messages")
+                              .orderBy("timestamp")
+                              .snapshots(),
+
+                          builder: (context, snapshot) {
+
+                            if (!snapshot.hasData) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            final docs = snapshot.data!.docs;
+
+                            return ListView(
+                              padding: const EdgeInsets.all(12),
+                              children: docs.map((doc) {
+                                return Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green[700],
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      doc["text"],
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                             );
-                          }).toList() ?? [],
+                          },
                         ),
                       ),
 
@@ -297,14 +357,24 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
                               IconButton(
                                 icon: const Icon(Icons.send, color: Colors.green),
-                                onPressed: () {
+                                onPressed: () async {
                                 final text = messageController.text.trim();
 
                                 if (text.isNotEmpty && selectedChat != null) {
-                                  setState(() {
-                                    messages.putIfAbsent(selectedChat!, () => []);
-                                    messages[selectedChat!]!.add(text);
-                                  });
+
+                                  final uid = _auth.currentUser!.uid;
+
+                                  await _firestore
+                                      .collection("users")
+                                      .doc(uid)
+                                      .collection("chats")
+                                      .doc(selectedChat)
+                                      .collection("messages")
+                                      .add({
+                                        "text": text,
+                                        "sender": uid,
+                                        "timestamp": FieldValue.serverTimestamp(),
+                                      });
 
                                   messageController.clear();
                                 }
