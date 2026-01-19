@@ -11,45 +11,74 @@ class WhatsAppScreen extends StatefulWidget {
 class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
   List<String> chats = [];
-
   String? selectedChat;
+  Map<String, List<String>> messages = {};
+  final messageController = TextEditingController();
+
 
   void showNewChatDialog(){
-    final emailController = TextEditingController();
+  final emailController = TextEditingController();
+  String? errorText;
 
-    showDialog(
-      context: context,
-      builder:(context){
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text("Start a New Chat",style: TextStyle(color: Colors.black),),
-          content: TextField(
-            controller: emailController,
-            //style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: "Enter Email",
-              hintStyle: TextStyle(color: Colors.grey),
+  showDialog(
+    context: context,
+    builder:(context){
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text(
+              "Start a New Chat",
+              style: TextStyle(color: Colors.black),
             ),
-          ),
-          actions: [
-            TextButton(onPressed: (){
-              final email = emailController.text;
-              if (email.isNotEmpty) {
-              setState(() {
-                    chats.insert(0, email);
-                  });
-              }
-              Navigator.pop(context);
-            }, child: Text("Start")),
+            content: TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                hintText: "Enter Email",
+                hintStyle: const TextStyle(color: Colors.grey),
+                errorText: errorText,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: (){
+                  final email = emailController.text.trim();
 
-            TextButton(onPressed: (){
-                Navigator.pop(context);
-              }
-            , child: Text("Cancel"))
-          ],
-        );
-      });
-  }
+                  final emailRegex =
+                      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+                  if (email.isEmpty) {
+                    setDialogState(() {
+                      errorText = "Email cannot be empty";
+                    });
+                  }
+                  else if (!emailRegex.hasMatch(email)) {
+                    setDialogState(() {
+                      errorText = "Enter a valid email address";
+                    });
+                  }
+                  else {
+                    setState(() {
+                      chats.insert(0, email);
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text("Start"),
+              ),
+
+              TextButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel"),
+              )
+            ],
+          );
+        },
+      );
+    });
+}
 
 
 
@@ -224,9 +253,29 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                   : Column(
                       children: [
 
-                        Expanded(
-                          child: Container(),
+                       Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.all(12),
+                          children: messages[selectedChat]?.map((msg) {
+                            return Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[700],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  msg,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            );
+                          }).toList() ?? [],
                         ),
+                      ),
+
 
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -236,6 +285,7 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
                               Expanded(
                                 child: TextField(
+                                  controller: messageController,
                                   style: const TextStyle(color: Colors.white),
                                   decoration: const InputDecoration(
                                     hintText: "Type a message",
@@ -247,7 +297,19 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
                               IconButton(
                                 icon: const Icon(Icons.send, color: Colors.green),
-                                onPressed: () {},
+                                onPressed: () {
+                                final text = messageController.text.trim();
+
+                                if (text.isNotEmpty && selectedChat != null) {
+                                  setState(() {
+                                    messages.putIfAbsent(selectedChat!, () => []);
+                                    messages[selectedChat!]!.add(text);
+                                  });
+
+                                  messageController.clear();
+                                }
+                              },
+
                               )
 
                             ],
