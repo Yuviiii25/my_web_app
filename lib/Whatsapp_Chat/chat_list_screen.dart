@@ -12,6 +12,8 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
   List<String> chats = [];
 
+  String? selectedChat;
+
   void showNewChatDialog(){
     final emailController = TextEditingController();
 
@@ -204,13 +206,56 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
           // Current Chat
           Expanded(
             child: Container(
-              color: Colors.grey[900],
-              child: const Center(
-                child: Text(
-                  "Open a chat",
-                  style: TextStyle(color: Colors.grey, fontSize: 18),
-                ),
+        decoration: selectedChat == null
+          ? null
+          : const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("background_chat/chat.jpg"),
+                fit: BoxFit.cover,
               ),
+            ),
+      child: selectedChat == null
+          ? const Center(
+              child: Text(
+                "Open a chat",
+                style: TextStyle(color: Colors.grey, fontSize: 18),
+              ),
+          )
+                  : Column(
+                      children: [
+
+                        Expanded(
+                          child: Container(),
+                        ),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          color: Colors.black,
+                          child: Row(
+                            children: [
+
+                              Expanded(
+                                child: TextField(
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: const InputDecoration(
+                                    hintText: "Type a message",
+                                    hintStyle: TextStyle(color: Colors.grey),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+
+                              IconButton(
+                                icon: const Icon(Icons.send, color: Colors.green),
+                                onPressed: () {},
+                              )
+
+                            ],
+                          ),
+                        )
+
+                      ],
+                    ),
             ),
           ),
         ],
@@ -220,10 +265,12 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
   Widget chatTile(String name, String message, String time) {
     return Material(
-      color: Colors.black,
+      color: selectedChat == name ? Colors.grey[900] : Colors.black,
       child: InkWell(
         onTap: () {
-          print("Open $name chat");
+          setState(() {
+            selectedChat = name;
+          });
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -274,4 +321,3 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
     );
   }
 }
-

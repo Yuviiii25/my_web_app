@@ -1,11 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:my_web_app/CalculatorScreen.dart';
-import 'package:my_web_app/SignIn_screen.dart';
-import 'package:my_web_app/Signup_screen.dart';
-import 'package:my_web_app/auth_gate.dart';
-import 'package:my_web_app/chat_list_screen.dart';
-import 'firebase_options.dart';
+import 'package:my_web_app/Calculator/CalculatorScreen.dart';
+import 'package:my_web_app/Login_pages/SignIn_screen.dart';
+import 'package:my_web_app/Login_pages/Signup_screen.dart';
+import 'package:my_web_app/Whatsapp_Chat/chat_list_screen.dart';
+import 'Firebase/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
