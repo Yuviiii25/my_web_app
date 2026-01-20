@@ -11,12 +11,62 @@ class WhatsAppScreen extends StatefulWidget {
 
 class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
-  List<String> chats = [];
+  List<Map<String, String>> chats = [];
   String? selectedChat;
   final messageController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+
+
+  String getChatId(String uid1, String uid2) {
+    return uid1.compareTo(uid2) < 0
+        ? "${uid1}_$uid2"
+        : "${uid2}_$uid1";
+  }
+
+
+
+  Future<void> loadChats() async {
+
+  final myUid = _auth.currentUser!.uid;
+
+  final snapshot = await _firestore
+      .collection("chats")
+      .where("users", arrayContains: myUid)
+      .get();
+
+  List<Map<String, String>> temp = [];
+
+  for (var doc in snapshot.docs) {
+
+    final users = List<String>.from(doc["users"]);
+
+    final otherUid = users.firstWhere((u) => u != myUid);
+
+    final userDoc = await _firestore
+        .collection("users")
+        .doc(otherUid)
+        .get();
+
+    temp.add({
+      "chatId": doc.id,
+      "email": userDoc["email"],
+    });
+  }
+
+  setState(() {
+    chats = temp;
+  });
+}
+
+
+  @override
+  void initState() {
+    super.initState();
+    loadChats();
+  }
 
 
 
@@ -63,14 +113,29 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                   }
                   else {
 
-                    final uid = _auth.currentUser!.uid;
+                    final myUid = _auth.currentUser!.uid;
+
+                    final userSnap = await _firestore
+                        .collection("users")
+                        .where("email", isEqualTo: email)
+                        .get();
+
+                    if (userSnap.docs.isEmpty) {
+                      setDialogState(() {
+                        errorText = "User not found";
+                      });
+                      return;
+                    }
+
+                    final otherUid = userSnap.docs.first.id;
+
+                    final chatId = getChatId(myUid, otherUid);
 
                     await _firestore
-                        .collection("users")
-                        .doc(uid)
                         .collection("chats")
-                        .doc(email)
+                        .doc(chatId)
                         .set({
+                          "users": [myUid, otherUid],
                           "createdAt": FieldValue.serverTimestamp(),
                         });
 
@@ -94,31 +159,6 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
       );
     });
 }
-
-
-
-  Future<void> loadChats() async {
-
-    final uid = _auth.currentUser!.uid;
-
-    final snapshot = await _firestore
-        .collection("users")
-        .doc(uid)
-        .collection("chats")
-        .get();
-
-    setState(() {
-      chats = snapshot.docs.map((e) => e.id).toList();
-    });
-  }
-
-
-
-  @override
-  void initState() {
-    super.initState();
-    loadChats();
-  }
 
 
 
@@ -267,7 +307,7 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                 : ListView.builder(
                     itemCount: chats.length,
                     itemBuilder: (context, index) {
-                      return chatTile(chats[index],"Tap to open", "Now");
+                      return chatTile(chats[index]["email"]!, "Tap to open", "Now");
                     },
                   ),
           ),
@@ -296,8 +336,6 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                        Expanded(
                         child: StreamBuilder(
                           stream: _firestore
-                              .collection("users")
-                              .doc(_auth.currentUser!.uid)
                               .collection("chats")
                               .doc(selectedChat)
                               .collection("messages")
@@ -316,12 +354,16 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                               padding: const EdgeInsets.all(12),
                               children: docs.map((doc) {
                                 return Align(
-                                  alignment: Alignment.centerRight,
+                                  alignment: doc["sender"] == _auth.currentUser!.uid
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
                                   child: Container(
                                     margin: const EdgeInsets.only(bottom: 8),
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                     decoration: BoxDecoration(
-                                      color: Colors.green[700],
+                                      color: doc["sender"] == _auth.currentUser!.uid
+                                          ? Colors.green[700]
+                                          : Colors.grey[800],
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -365,8 +407,6 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                                   final uid = _auth.currentUser!.uid;
 
                                   await _firestore
-                                      .collection("users")
-                                      .doc(uid)
                                       .collection("chats")
                                       .doc(selectedChat)
                                       .collection("messages")
@@ -401,7 +441,7 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
       child: InkWell(
         onTap: () {
           setState(() {
-            selectedChat = name;
+            selectedChat = chats.firstWhere((e) => e["email"] == name)["chatId"];
           });
         },
         child: Padding(
