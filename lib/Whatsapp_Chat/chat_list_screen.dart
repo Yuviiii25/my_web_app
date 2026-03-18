@@ -164,6 +164,9 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
     return Scaffold(
       appBar: AppBar(
       backgroundColor: Colors.black,
@@ -292,29 +295,45 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
         ),
       ),
 
-      body: Row(
+      body: isMobile
+          ? (selectedChat == null ? buildChatList() : buildChatScreen())
+          : Row(
         children: [
 
           // Chat List
           Container(
             width: MediaQuery.of(context).size.width * 0.30,
-            color: Colors.black,
-            child: chats.isEmpty
-                ? const Center(
-                    child: Text("No chats",
-                        style: TextStyle(color: Colors.grey)),
-                  )
-                : ListView.builder(
-                    itemCount: chats.length,
-                    itemBuilder: (context, index) {
-                      return chatTile(chats[index]["email"]!, "Tap to open", "Now");
-                    },
-                  ),
+            child: buildChatList(),
           ),
 
           // Current Chat
           Expanded(
-            child: Container(
+            child: buildChatScreen(),
+          ),
+        ],
+      )
+    );
+  }
+
+  Widget buildChatList() {
+    return Container(
+      color: Colors.black,
+      child: chats.isEmpty
+          ? const Center(
+              child: Text("No chats",
+                  style: TextStyle(color: Colors.grey)),
+            )
+          : ListView.builder(
+              itemCount: chats.length,
+              itemBuilder: (context, index) {
+                return chatTile(chats[index]["email"]!, "Tap to open", "Now");
+              },
+            ),
+    );
+  }
+
+  Widget buildChatScreen() {
+    return Container(
         decoration: selectedChat == null
           ? null
           : const BoxDecoration(
@@ -330,108 +349,125 @@ class _WhatsAppScreenState extends State<WhatsAppScreen> {
                 style: TextStyle(color: Colors.grey, fontSize: 18),
               ),
           )
-                  : Column(
-                      children: [
+          : Column(
+              children: [
 
-                       Expanded(
-                        child: StreamBuilder(
-                          stream: _firestore
-                              .collection("chats")
-                              .doc(selectedChat)
-                              .collection("messages")
-                              .orderBy("timestamp")
-                              .snapshots(),
+                if (MediaQuery.of(context).size.width < 800)
+                Container(
+                  color: Colors.black,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            selectedChat = null;
+                          });
+                        },
+                      ),
+                      const Text(
+                        "Chat",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
 
-                          builder: (context, snapshot) {
+               Expanded(
+                child: StreamBuilder(
+                  stream: _firestore
+                      .collection("chats")
+                      .doc(selectedChat)
+                      .collection("messages")
+                      .orderBy("timestamp")
+                      .snapshots(),
 
-                            if (!snapshot.hasData) {
-                              return const Center(child: CircularProgressIndicator());
-                            }
+                  builder: (context, snapshot) {
 
-                            final docs = snapshot.data!.docs;
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                            return ListView(
-                              padding: const EdgeInsets.all(12),
-                              children: docs.map((doc) {
-                                return Align(
-                                  alignment: doc["sender"] == _auth.currentUser!.uid
-                                      ? Alignment.centerRight
-                                      : Alignment.centerLeft,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: doc["sender"] == _auth.currentUser!.uid
-                                          ? Colors.green[700]
-                                          : Colors.grey[800],
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      doc["text"],
-                                      style: const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            );
-                          },
+                    final docs = snapshot.data!.docs;
+
+                    return ListView(
+                      padding: const EdgeInsets.all(12),
+                      children: docs.map((doc) {
+                        return Align(
+                          alignment: doc["sender"] == _auth.currentUser!.uid
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: doc["sender"] == _auth.currentUser!.uid
+                                  ? Colors.green[700]
+                                  : Colors.grey[800],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              doc["text"],
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ),
+
+
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  color: Colors.black,
+                  child: Row(
+                    children: [
+
+                      Expanded(
+                        child: TextField(
+                          controller: messageController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: "Type a message",
+                            hintStyle: TextStyle(color: Colors.grey),
+                            border: InputBorder.none,
+                          ),
                         ),
                       ),
 
+                      IconButton(
+                        icon: const Icon(Icons.send, color: Colors.green),
+                        onPressed: () async {
+                        final text = messageController.text.trim();
 
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          color: Colors.black,
-                          child: Row(
-                            children: [
+                        if (text.isNotEmpty && selectedChat != null) {
 
-                              Expanded(
-                                child: TextField(
-                                  controller: messageController,
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    hintText: "Type a message",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
+                          final uid = _auth.currentUser!.uid;
 
-                              IconButton(
-                                icon: const Icon(Icons.send, color: Colors.green),
-                                onPressed: () async {
-                                final text = messageController.text.trim();
+                          await _firestore
+                              .collection("chats")
+                              .doc(selectedChat)
+                              .collection("messages")
+                              .add({
+                                "text": text,
+                                "sender": uid,
+                                "timestamp": FieldValue.serverTimestamp(),
+                              });
 
-                                if (text.isNotEmpty && selectedChat != null) {
+                          messageController.clear();
+                        }
+                      },
 
-                                  final uid = _auth.currentUser!.uid;
+                      )
 
-                                  await _firestore
-                                      .collection("chats")
-                                      .doc(selectedChat)
-                                      .collection("messages")
-                                      .add({
-                                        "text": text,
-                                        "sender": uid,
-                                        "timestamp": FieldValue.serverTimestamp(),
-                                      });
+                    ],
+                  ),
+                )
 
-                                  messageController.clear();
-                                }
-                              },
-
-                              )
-
-                            ],
-                          ),
-                        )
-
-                      ],
-                    ),
+              ],
             ),
-          ),
-        ],
-      )
     );
   }
 
